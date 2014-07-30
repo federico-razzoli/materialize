@@ -18,6 +18,7 @@ materialize.sql contains the SQL statements which are necessary to create all ne
 
 First, open it and search for these lines:
 
+```
 	OPTIONS
 	(
 		  HOST '127.0.0.1'
@@ -26,6 +27,7 @@ First, open it and search for these lines:
 		, PORT 3306
 		, DATABASE '_'
 	)
+```
 
 Replace these data with some working login credentials.
 
@@ -83,6 +85,7 @@ Limitations:
 
 Example:
 
+```
 MariaDB [test]> CALL _.materialize_sql('test', 'schemas', 'SHOW SCHEMAS LIKE \'h%\'');
 Query OK, 0 rows affected (0.10 sec)
 MariaDB [test]> SELECT * FROM test.schemas;
@@ -92,6 +95,7 @@ MariaDB [test]> SELECT * FROM test.schemas;
 | hangman       |
 +---------------+
 1 row in set (0.09 sec)
+```
 
 _.administrative_sql()
 ======================
@@ -103,6 +107,7 @@ Parameters:
 
 Example:
 
+```
 MariaDB [test]> CALL _.administrative_sql('CHECK TABLE mysql.tables_priv');
 +-------------------+-------+----------+----------+
 | Table             | Op    | Msg_type | Msg_text |
@@ -112,12 +117,14 @@ MariaDB [test]> CALL _.administrative_sql('CHECK TABLE mysql.tables_priv');
 1 row in set (0.04 sec)
 
 Query OK, 0 rows affected (0.04 sec)
+```
 
 show_*
 ======
 
 Some SHOW statements return results that can also be retreive by querying a system table in the information_schema database. Others, like SHOW MASTER STATUS, return results that cannot be obtained in other ways. For each statement of the second type, a table will be created in the _ database. For example:
 
+```
 MariaDB [test]> SELECT * FROM _.show_master_status;
 +---------------+----------+--------------+------------------+
 | File          | Position | Binlog_Do_DB | Binlog_Ignore_DB |
@@ -125,4 +132,5 @@ MariaDB [test]> SELECT * FROM _.show_master_status;
 | binlog.000018 |     2231 |              |                  |
 +---------------+----------+--------------+------------------+
 1 row in set (0.02 sec)
+```
 
