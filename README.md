@@ -4,6 +4,10 @@ AUTHOR
 This library has been created by Federico Razzoli:
 info [At) federico - razzoli . com
 
+You can do whatever you want with this work. But if you make any changes, please make them public if you can.
+
+Also, if you use this work, please send an email to the author - it would be appreciated.
+
 REQUIREMENTS
 ============
 
@@ -59,7 +63,7 @@ ABSTRACT
 There are several limits to the SQL statements which can be executed inside a stored routine:
 * Some statements cannot be executed at all (example: CHECK TABLE).
 * Some statements can be executed, but only as prepared statements, which makes the procedures even more verbose.
-* Some statements can be executed, but their results are not accessible from the procedure (SHOW, EXPLAIN).
+* Some statements can be executed, but their results are not accessible from the procedure (SHOW, EXPLAIN, HELP).
 * There is no way to execute some statements and avoid to return their results to the client (CALL).
 
 The CONNECT storage engine solves this problem. If a CONNECT table is of MYSQL type and contains a SRCDEF table option, the specified statements will be executed on the specified server (possibly the local server) each time the table is queried. Of course, the results of the statement will be returned by the queries. This mechanism is based on normal SELECTs, thus it works even inside stored routines.
