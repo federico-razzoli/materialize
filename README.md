@@ -2,6 +2,7 @@ AUTHOR
 ======
 
 This library has been created by Federico Razzoli:
+
 info [At) federico - razzoli . com
 
 You can do whatever you want with this work. But if you make any changes, please make them public if you can.
@@ -36,18 +37,27 @@ First, open it and search for these lines:
 Replace these data with some working login credentials.
 
 To execute it:
-/path/to/mysql -u<username> -p<password> < /path/to/materialize.sql
 
-The CONNECT storage engine will be installed.
+```
+/path/to/mysql -u<username> -p<password> < /path/to/materialize.sql
+```
+
+The CONNECT storage engine will be installed too.
 
 UNINSTALL
 =========
 
 To uninstall, just execute:
+
+```
 DROP DATABASE _;
+```
 
 You may also want to uninstall the CONNECT storage engine:
+
+```
 UNINSTALL SONAME 'ha_connect';
+```
 
 SECURITY NOTE
 =============
