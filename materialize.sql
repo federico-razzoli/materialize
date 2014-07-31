@@ -142,12 +142,7 @@ CREATE OR REPLACE TABLE `_`.`show_contributors`
 ;
 
 
-CREATE OR REPLACE TABLE `_`.`show_errors`
-	ENGINE = CONNECT
-	TABLE_TYPE = MYSQL
-	SRCDEF = 'SHOW ERRORS'
-	CONNECTION = '_'
-;
+DROP TABLE IF EXISTS `_`.`show_errors`;
 
 
 CREATE OR REPLACE VIEW `_`.`show_master_logs` AS
@@ -181,10 +176,5 @@ CREATE OR REPLACE TABLE `_`.`show_privileges`
 -- SHOW PROFILE and SHOW PROFILES only work within the session.
 
 
-CREATE OR REPLACE TABLE `_`.`show_warnings`
-	ENGINE = CONNECT
-	TABLE_TYPE = MYSQL
-	SRCDEF = 'SHOW WARNINGS'
-	CONNECTION = '_'
-;
+DROP TABLE IF EXISTS `_`.`show_warnings`;
 
