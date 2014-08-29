@@ -1,0 +1,10 @@
+What's new
+
+1.1
+
+* user variables and prepared statements start with __ to avoid conflicts
+* @__connect_server
+* @__autoselect
+* @__autodrop
+* administrative_sql() doesn't fail if administrative_sql table has been dropped
+
