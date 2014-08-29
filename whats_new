@@ -1,4 +1,4 @@
-What's new
+WHATS NEW
 
 1.1
 
@@ -7,4 +7,5 @@ What's new
 * @__autoselect
 * @__autodrop
 * administrative_sql() doesn't fail if administrative_sql table has been dropped
+* waning if a trx is active
 

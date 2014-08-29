@@ -1,3 +1,8 @@
+/*
+	Version: 1.1
+*/
+
+
 INSTALL SONAME 'ha_connect';
 
 
@@ -27,50 +32,101 @@ DELIMITER ||
 CREATE PROCEDURE `_`.`materialize_sql`(IN p_db_name VARCHAR(64), IN p_tab_name VARCHAR(64), IN p_sql TEXT)
         MODIFIES SQL DATA
 BEGIN
-        SET p_db_name := CONCAT('`', REPLACE(p_db_name, '`', '``'), '`');
+	-- the warning must be raised later,
+	-- because the diagnostics area is emptied during the routine
+	DECLARE trx_warning BOOL DEFAULT @@in_transaction;
+	
+	DECLARE EXIT HANDLER
+		FOR 1939
+	BEGIN
+		RESIGNAL SET
+			  CLASS_ORIGIN = 'materialize'
+			, MESSAGE_TEXT = 'CONNECT table could not be created; check your SQL'
+			;
+	END;
+	
+	IF @@in_transaction = 1 THEN
+		SIGNAL SQLSTATE '01000' SET
+			  CLASS_ORIGIN = 'materialize'
+			, MESSAGE_TEXT = 'materialize_sql() will implicitly commit current transaction'
+			;
+	END IF;
+	
+	SET p_db_name := CONCAT('`', REPLACE(p_db_name, '`', '``'), '`');
 	SET p_tab_name := CONCAT('`', REPLACE(p_tab_name, '`', '``'), '`');
         
         -- create table
-        SET @v_materialized_sql := CONCAT_WS('',
+        SET @__materialized_sql := CONCAT_WS('',
                   'CREATE OR REPLACE TABLE ', p_db_name, '.', p_tab_name
                 , ' ENGINE = CONNECT'
                 , ' TABLE_TYPE = MYSQL'
                 , ' SRCDEF = ''', REPLACE(p_sql, '''', ''''''), ''''
-                , ' CONNECTION = ''_'''
+                , ' CONNECTION = ''', IFNULL(@__connect_server, '_'), ''''
                 );
-        PREPARE stmt_materialized_sql FROM @v_materialized_sql;
-        EXECUTE stmt_materialized_sql;
-	DEALLOCATE PREPARE stmt_materialized_sql;
-	SET @v_materialized_sql := NULL;
+        PREPARE __stmt_materialized_sql FROM @__materialized_sql;
+        EXECUTE __stmt_materialized_sql;
+	
+	-- if @__autoselect is enabled, show results
+	IF @__autoselect IS TRUE OR @__autodrop IS TRUE THEN
+		SET @__materialized_sql := CONCAT_WS('', 'SELECT * FROM ', p_db_name, '.', p_tab_name);
+		PREPARE __stmt_materialized_sql FROM @__materialized_sql;
+		EXECUTE __stmt_materialized_sql;
+	END IF;
+	
+	-- if @__autodrop is enabled, table is now dropped
+	IF @__autodrop IS TRUE THEN
+		SET @__materialized_sql := CONCAT_WS('', 'DROP TABLE ', p_db_name, '.', p_tab_name);
+		PREPARE __stmt_materialized_sql FROM @__materialized_sql;
+		EXECUTE __stmt_materialized_sql;
+	END IF;
+	
+	SET @__materialized_sql := NULL;
+	DEALLOCATE PREPARE __stmt_materialized_sql;
+	
+	IF trx_warning THEN
+		SIGNAL SQLSTATE '01000' SET
+			  CLASS_ORIGIN = 'materialize'
+			, MESSAGE_TEXT = 'administrative_sql() has implicitly committed a transaction'
+			;
+	END IF;
 END ||
 DELIMITER ;
 
-
--- contains resultsets for OPTIMIZE, ANALYZE, CHECK, REPAIR
-CREATE OR REPLACE TABLE `_`.`administrative_sql`
-(
-	  `Table` VARCHAR(64) NOT NULL
-	, `Op` VARCHAR(255) NOT NULL
-	, `Msg_type` VARCHAR(255) NOT NULL
-	, `Msg_text` VARCHAR(255) NOT NULL
-)
-	ENGINE = CONNECT
-	TABLE_TYPE = MYSQL
-	SRCDEF = 'CHECK TABLE t'
-	CONNECTION = '_'
-;
 
 DROP PROCEDURE IF EXISTS `_`.`administrative_sql`;
 DELIMITER ||
 CREATE PROCEDURE `_`.`administrative_sql`(IN p_sql TEXT)
 	MODIFIES SQL DATA
 BEGIN
+	DECLARE trx_warning BOOL DEFAULT @@in_transaction;
+	
+	-- contains resultsets for OPTIMIZE, ANALYZE, CHECK, REPAIR
+	CREATE OR REPLACE TABLE `_`.`administrative_sql`
+	(
+		  `Table` VARCHAR(64) NOT NULL
+		, `Op` VARCHAR(255) NOT NULL
+		, `Msg_type` VARCHAR(255) NOT NULL
+		, `Msg_text` VARCHAR(255) NOT NULL
+	)
+		ENGINE = CONNECT
+		TABLE_TYPE = MYSQL
+		SRCDEF = 'CHECK TABLE t'
+		CONNECTION = '_'
+	;
+	
 	SET @v_administrative_sql := CONCAT_WS('', 'ALTER TABLE _.administrative_sql SRCDEF = \'', p_sql, '\'');
 	PREPARE stmt_administrative_sql FROM @v_administrative_sql;
 	EXECUTE stmt_administrative_sql;
 	DEALLOCATE PREPARE stmt_administrative_sql;
 	SET @v_administrative_sql := NULL;
 	SELECT * FROM _.administrative_sql;
+	
+	IF trx_warning THEN
+		SIGNAL SQLSTATE '01000' SET
+			  CLASS_ORIGIN = 'materialize'
+			, MESSAGE_TEXT = 'administrative_sql() has implicitly committed a transaction'
+			;
+	END IF;
 END ||
 DELIMITER ;
 

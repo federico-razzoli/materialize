@@ -34,7 +34,7 @@ First, open it and search for these lines:
 	)
 ```
 
-Replace these data with some working login credentials.
+Replace these data with some working login credentials. These credentials will be used by default.
 
 To execute it:
 
@@ -85,7 +85,9 @@ This library provides convenient non-verbose syntaxes to achieve the same result
 _.materialize_sql()
 ===================
 
-Create a CONNECT table based on the specified SQL statement. Querying the table will execute the statement on the local server. The results will be returned by the query.
+Create a CONNECT table based on the specified SQL statement. By default, querying the table will execute the statement on the local server. To use a remote server, modify the definition of the _ server, which is used by default, or set @__connect_server to a different server name.
+
+If @__autoselect or @__autodrop is enabled, materialize_sql() returns a resultset with the table's contents. With @__autodrop, the table is automatically dropped.
 
 Parameters:
 * p_db_name: Database which will contain the CONNECT table.
