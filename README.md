@@ -3,7 +3,7 @@ AUTHOR
 
 This library has been created by Federico Razzoli:
 
-info [At) federico - razzoli . com
+federico_raz [At) yahoo . it
 
 You can do whatever you want with this work. But if you make any changes, please make them public if you can.
 
